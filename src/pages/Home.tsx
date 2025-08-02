@@ -1,39 +1,79 @@
 import Layout from "../layouts/Layout.tsx";
-import SaplingLogo from "../components/SaplingLogo.ts";
-import { Counter } from "../components/Counter.tsx";
+import { ChatInput } from "../components/ChatInput.tsx";
 
 export function Home() {
   return (
     <Layout>
-      <main
-        class="max-w-screen-lg min-h-screen mx-auto px-4 py-16 flex flex-col items-center justify-center font-sans"
-      >
-        <div class="flex flex-col gap-4">
-          {/* JSX components are rendered as HTML */}
-          <SaplingLogo width={200} height={48} />
-          <p>To get started check out our quick start guide</p>
-          <a
-            href="https://sapling.land/docs/quick-start-deno"
-            class="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full hover:bg-gray-800 @dark:bg-white @dark:text-black @dark:hover:bg-gray-200 w-fit"
-            >Deno Quick Start
-            <span class="flex items-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="1em"
-                height="1em"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  fill="currentColor"
-                  d="M5.4 20L4 18.6L15.6 7H9V5h10v10h-2V8.4z"
-                ></path>
-              </svg>
-            </span>
-          </a>
+      <main class="h-screen bg-gray-50 flex flex-col font-sans overflow-hidden">
+        {/* Header - shown when no messages */}
+        <div id="welcome-header" class="flex-1 flex flex-col items-center justify-center px-4">
+          <div class="w-full max-w-4xl mx-auto flex flex-col items-center gap-8">
+            <div class="flex items-center gap-3 mb-8">
+              <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <div class="w-6 h-6 border-2 border-white rounded-full"></div>
+              </div>
+              <h1 class="text-5xl font-normal text-black">Sapling Chat</h1>
+            </div>
+            
+            <p class="text-sm text-gray-500 text-center mt-8">
+              By messaging Sapling Chat, you agree to our Terms and Privacy Policy.
+            </p>
+          </div>
         </div>
-        <div class="mt-8">
-          <Counter /> 
+
+        {/* Chat view - shown when there are messages */}
+        <div id="chat-view" class="hidden h-full flex flex-col">
+          <div class="flex items-center gap-3 p-4 border-b border-gray-200 bg-white flex-shrink-0">
+            <div class="w-6 h-6 bg-black rounded-full flex items-center justify-center">
+              <div class="w-4 h-4 border-2 border-white rounded-full"></div>
+            </div>
+            <h1 class="text-2xl font-normal text-black">Sapling Chat</h1>
+          </div>
+          
+          <div class="flex-1 overflow-y-auto p-4">
+            <div id="chat-messages" class="max-w-3xl mx-auto space-y-4">
+              {/* Messages will be inserted here by HTMX */}
+            </div>
+          </div>
+          
+          <div class="p-4 border-t border-gray-200 bg-white flex-shrink-0">
+            <div class="max-w-3xl mx-auto">
+              <ChatInput id="chat" />
+            </div>
+          </div>
         </div>
+        
+        {/* Floating input - shown initially */}
+        <div id="floating-input" class="fixed bottom-0 left-0 right-0 p-4 bg-gray-50">
+          <div class="max-w-3xl mx-auto">
+            <ChatInput id="floating" />
+          </div>
+        </div>
+
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Show chat view when first message is sent
+            document.body.addEventListener('htmx:afterRequest', function(evt) {
+              if (evt.detail.xhr.status === 200 && evt.detail.target.id === 'chat-messages') {
+                // Hide welcome header and floating input
+                document.getElementById('welcome-header').style.display = 'none';
+                document.getElementById('floating-input').style.display = 'none';
+                
+                // Show chat view
+                document.getElementById('chat-view').classList.remove('hidden');
+                document.getElementById('chat-view').classList.add('flex');
+                
+                // Scroll to bottom of chat area
+                setTimeout(() => {
+                  const chatContainer = document.querySelector('#chat-view .overflow-y-auto');
+                  if (chatContainer) {
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+                  }
+                }, 50);
+              }
+            });
+          `
+        }}></script>
       </main>
     </Layout>
   );
