@@ -106,7 +106,7 @@ site.post("/chat", async (c: Context) => {
         <div class="flex justify-start">
           <div 
             id={responseId} 
-            class="bg-gray-100 text-black px-4 py-2 rounded-2xl max-w-xs break-words prose prose-sm"
+            class="bg-gray-100 text-black px-4 py-2 rounded-2xl max-w-xs break-words prose"
             data-session={sessionId}
             data-message={message}
           >
